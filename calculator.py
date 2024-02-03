@@ -1,45 +1,93 @@
-from __future__ import annotations
-from typing import Callable
-
 class Calculator:
 
-    ROUND_DIGITS: int = 5
+    ROUND_DIGITS = 5
 
-    def __init__(self, result: float = 0) -> None:
-        self.result = result
+    def __init__(self) -> None:
+        self.final_result: float = 0
+        self.next_value: float | str = ""
+        self.current_operation: str = ""
 
-    def __add__(self, other: float) -> Calculator:
-        return Calculator(self.result + other)
+    def append_digit(self, digit: str):
+        if not digit.isdigit():
+            raise ValueError("Trying to enter a letter as a number.")
 
-    def __mul__(self, other: float) -> Calculator:
-        return Calculator(self.result * other)
+        if not self.current_operation:
+            self.final_result = 0
 
-    def __sub__(self, other: float) -> Calculator:
-        return Calculator(self.result - other)
+        self.next_value = str(self.next_value) + digit
 
-    def __truediv__(self, other: float) -> Calculator:
-        return Calculator(self.result / other)
+    def append_decimal(self):
+        if not self.next_value:
+            self.next_value = "0."
+        elif "." not in str(self.next_value):
+            self.next_value = str(self.next_value) + "."
 
-    @staticmethod
-    def symbol_to_operator(
-                symbol: str
-            ) -> Callable[[Calculator, float], Calculator]:
+    def symbol_to_operation(self, symbol: str) -> None:
 
-        symbol_map: dict[str, Callable[[Calculator, float], Calculator]] = {
-            "+": Calculator.__add__,
-            "-": Calculator.__sub__,
-            "*": Calculator.__mul__,
-            "x": Calculator.__mul__,
-            "/": Calculator.__truediv__
-        }
+        symbol = symbol.lower().strip()
 
-        if symbol in symbol_map:
-            return symbol_map[symbol]
-        else:
-            raise ValueError("The inputted symbol is invalid.")
+        match(symbol):
+            case ".":
+                self.append_decimal()
+                return
+            case "ac":
+                self.final_result = 0
+                self.next_value = ""
+                self.current_operation = ""
+                return
+            case "+/-":
+                if self.next_value:
+                    self.next_value = float(self.next_value)
+                    if self.next_value.is_integer():
+                        self.next_value = int(self.next_value)
+                    self.next_value *= -1
+                else:
+                    self.final_result *= -1
+                return
+            case "%":
+                if self.next_value:
+                    self.next_value = float(self.next_value) / 100
+                else:
+                    self.final_result /= 100
+                return
+
+        self.process_current_operation()
+
+        if symbol != "=":
+            self.current_operation = symbol
+
+            if not self.final_result:
+                self.final_result = float(self.next_value)
+                self.next_value = ""
+
+    def process_current_operation(self) -> None:
+        if not self.next_value or not self.current_operation:
+            return
+
+        self.next_value = float(self.next_value)
+
+        match(self.current_operation):
+            case "+":
+                self.final_result += self.next_value
+            case "-":
+                self.final_result -= self.next_value
+            case "*" | "x":
+                self.final_result *= self.next_value
+            case "/":
+                self.final_result /= self.next_value
+
+        self.next_value = ""
+        self.current_operation = ""
 
     def __str__(self) -> str:
-        return str(
-            int(self.result) if self.result.is_integer()
-            else self.result.__round__(Calculator.ROUND_DIGITS)
-        )
+        if self.next_value:
+            return str(self.next_value)
+        else:
+            result = self.final_result
+            return str(
+                int(result) if result.is_integer()
+                else result.__round__(Calculator.ROUND_DIGITS)
+            )
+
+    def __repr__(self) -> str:
+        return f"Calculator({self.final_result}, {self.next_value}, {self.current_operation})"
