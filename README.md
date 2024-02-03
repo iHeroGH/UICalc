@@ -5,12 +5,14 @@ Estimate:
 - 1 for backend, 2 for frontend
 
 Log:
-- 12:05 AM, 20 minutes, backend implementation of the calculator
+- 20 minutes, backend implementation of the calculator
+- 1 hour, frontend implementation
+- 2 hours, backend rewrite and testing
 
 Bugs Found:
-- 0
+- A bunch of bugs related to the relation of the final result and the next value
+- A bunch of bugs related to the framing and positioning of the buttons for the frontend
 
 Total Time Spent:
-- 20 mins / 1 hour for backend
-- /2 for frontend
-- /? for misc.
+- 2 hours / 1 hour for backend
+- 1 hour / 2 hours for frontend
