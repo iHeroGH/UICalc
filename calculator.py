@@ -2,10 +2,11 @@ class Calculator:
 
     ROUND_DIGITS = 5
 
-    def __init__(self) -> None:
+    def __init__(self, max_length: int = -1) -> None:
         self.final_result: float = 0
         self.next_value: float | str = ""
         self.current_operation: str = ""
+        self.max_length = max_length
 
     def append_digit(self, digit: str):
         if not digit.isdigit():
@@ -14,7 +15,8 @@ class Calculator:
         if not self.current_operation:
             self.final_result = 0
 
-        self.next_value = str(self.next_value) + digit
+        if len(str(self.next_value)) <= self.max_length:
+            self.next_value = str(self.next_value) + digit
 
     def append_decimal(self):
         if not self.next_value:
@@ -57,8 +59,9 @@ class Calculator:
             self.current_operation = symbol
 
             if not self.final_result:
-                self.final_result = float(self.next_value)
-                self.next_value = ""
+                if self.next_value:
+                    self.final_result = float(self.next_value)
+                    self.next_value = ""
 
     def process_current_operation(self) -> None:
         if not self.next_value or not self.current_operation:
@@ -81,12 +84,14 @@ class Calculator:
 
     def __str__(self) -> str:
         if self.next_value:
-            return str(self.next_value)
-        else:
-            result = self.final_result
             return str(
-                int(result) if result.is_integer()
-                else result.__round__(Calculator.ROUND_DIGITS)
+                int(self.next_value) if float(self.next_value).is_integer()
+                else self.next_value
+            )
+        else:
+            return str(
+                int(self.final_result) if self.final_result.is_integer()
+                else self.final_result.__round__(Calculator.ROUND_DIGITS)
             )
 
     def __repr__(self) -> str:

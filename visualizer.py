@@ -15,6 +15,7 @@ class Visualizer:
     FONT_NAME = "Helvetica Neue"
     DISPLAY_FONT_SIZE = 50
     BUTTON_FONT_SIZE = 30
+    MAX_NEXT_LENGTH = 10
 
     # COLORS
     DISPLAY = "black", "white"
@@ -23,7 +24,7 @@ class Visualizer:
     OPERATORS = "#FF9F0A", "white"
 
     def __init__(self):
-        self.calculator = Calculator()
+        self.calculator = Calculator(Visualizer.MAX_NEXT_LENGTH)
 
         self.height = Visualizer.HEIGHT
         self.width = Visualizer.WIDTH
@@ -63,7 +64,7 @@ class Visualizer:
                 fg=Visualizer.DISPLAY[1]
             )
         self.input_label.grid(
-            column=0, row=0, sticky='e', ipadx=Visualizer.BUTTON_PAD
+            column=0, row=0, sticky='e', padx=Visualizer.BUTTON_PAD
         )
 
         self._initialize_buttons()
@@ -118,15 +119,30 @@ class Visualizer:
 
     def _process_button(self, button_label: str) -> None:
 
-        if button_label.lower().strip().isdigit():
+        button_label = button_label.lower().strip()
+
+        if button_label.isdigit():
             self.calculator.append_digit(button_label)
         else:
             self.calculator.symbol_to_operation(button_label)
 
         self.input_label.configure(text=str(self.calculator))
+        self._check_font_size()
 
     def _begin(self) -> None:
         self.window.mainloop()
+
+    def _check_font_size(self):
+        font_size = Visualizer.DISPLAY_FONT_SIZE
+
+        self.display_font.configure(size=font_size)
+        self.input_label.configure(font=self.display_font)
+
+        # Maintain less than padding on both sides
+        while self.input_label.winfo_reqwidth() > self.width - Visualizer.BUTTON_PAD * 2 * 3:
+            font_size -= 1
+            self.display_font.configure(size=font_size)
+            self.input_label.configure(font=self.display_font)
 
 if __name__ == "__main__":
     vis = Visualizer()
