@@ -118,7 +118,6 @@ class Visualizer:
             curr_col = 0
 
     def _process_button(self, button_label: str) -> None:
-
         button_label = button_label.lower().strip()
 
         if button_label.isdigit():
